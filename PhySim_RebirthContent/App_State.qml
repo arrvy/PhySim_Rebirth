@@ -45,9 +45,9 @@ Rectangle {
                     simul_Menu.dataUntukLevel = levels;
 
 
-                    }
                 }
-            }
+        }
+    }
 
 
 
@@ -56,7 +56,21 @@ Rectangle {
         id: simul_Menu
         anchors.fill: parent
 
+        Connections {
+            target: simul_Menu
+            function onGoTolevelSelected(indexLevel) {
+                console.log("clicked")
+                appRoot.state = "pygame_State"
 
+            }
+        }
+
+
+
+    }
+
+    SimulasiPygame {
+        id: simulasiPygame
     }
 
     // Definisi state Anda sudah benar.
@@ -72,6 +86,11 @@ Rectangle {
                 target: simul_Menu
                 visible: false
             }
+
+            PropertyChanges {
+                target: simulasiPygame
+                visible: false
+            }
         },
         State {
             name: "mainMenuState"
@@ -82,6 +101,11 @@ Rectangle {
 
             PropertyChanges {
                 target: simul_Menu
+                visible: false
+            }
+
+            PropertyChanges {
+                target: simulasiPygame
                 visible: false
             }
         },
@@ -101,6 +125,29 @@ Rectangle {
             PropertyChanges {
                 target: simul_Menu
                 visible: true }
+
+                PropertyChanges {
+                    target: simulasiPygame
+                    visible: false
+                }
+        },
+        State {
+            name: "pygame_State"
+
+            PropertyChanges {
+                target: simul_Menu
+                visible: false
+            }
+
+            PropertyChanges {
+                target: mainMenuPage
+                visible: false
+            }
+
+            PropertyChanges {
+                target: loginPage
+                visible: false
+            }
         }
     ]
 }

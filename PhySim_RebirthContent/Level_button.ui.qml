@@ -12,6 +12,8 @@ import QtQuick.Controls
 Button {
     id: control
 
+    //property alias buttonText: textItem.text
+
     implicitWidth: Math.max(
                        buttonBackground ? buttonBackground.implicitWidth : 0,
                        textItem.implicitWidth + leftPadding + rightPadding)

@@ -74,7 +74,8 @@ Pane {
                         id: delegateButton
                         width: Level_button.width
                         height: Level_button.height
-                        text: modelData.namaMateri
+                        text:modelData.namaMateri
+                        //buttonText: modelData.namaMateri
                         Layout.alignment: Qt.AlignHCenter
 
                         property string namaMateriDelegate: modelData.namaMateri
