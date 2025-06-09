@@ -43,6 +43,7 @@ Rectangle {
                     var levels = DB.materi[levelIndex].levels;
 
                     simul_Menu.simul_level.daftarLevel = levels;
+                    console.log(levels)
 
                     }
                 }
