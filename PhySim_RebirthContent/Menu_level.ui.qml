@@ -79,12 +79,10 @@ Pane {
                         property string namaMateriDelegate: modelData.namaMateri
 
                         Connections {
-                            target: this
-                            //function
-                            onClicked: Main_Menu.goToselectSimulation(text)
-                            /*{
+                            target: delegateButton
+                            function onClicked(){
                                 pane.selectSimulation(delegateButton.namaMateriDelegate)
-                            }*/
+                            }
                         }
                     }
                 }
