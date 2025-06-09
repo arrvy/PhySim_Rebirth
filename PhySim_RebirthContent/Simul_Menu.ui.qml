@@ -11,6 +11,7 @@ import QtQuick.Controls
 import PhySim_Rebirth
 import QtQuick.Studio.DesignEffects
 
+
 Rectangle {
     id: root
 

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import PhySim_Rebirth 1.0
+import PhySim_Rebirth
 import "DataLevel.js" as DB
 
 Pane {

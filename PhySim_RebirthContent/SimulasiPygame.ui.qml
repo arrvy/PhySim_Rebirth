@@ -1,73 +1,59 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "DataLevel.js" as DB
+import PhySim_Rebirth
 
-Item {
-    id: simulation
-    width: 1920
-    height: 1080
-    signal simulationBack
-    property string namaSimulasi: "Simulasi"
-    property string simulationId: "bola_memantul"
-    // Latar belakang untuk halaman ini
-    Rectangle {
-        anchors.fill: parent
-        color: "#2c3e50" // Warna gelap agar fokus ke simulasi
-    }
+// Import your custom module
 
+// Assuming this is the basic structure of your SimulasiPygame.ui.qml.
+// You might need to adapt this to the actual structure of your file.
+Rectangle {
+    id: simulasiPygameRoot
+    width: 1024
+    height: 768
+    color: "#F0F0F0" // Example background color
+
+    // Main column layout (or whatever layout you are using)
     ColumnLayout {
-        width: 800
-        height: 875
-        anchors.centerIn: parent
+        anchors.fill: parent
         spacing: 20
+        //padding: 20
 
-        Text {
-            height: 46
-            text: "Area Simulasi Pygame : " + namaSimulasi
-            color: "white"
+        // Title or other UI elements
+        Label {
+            text: "Pygame Physics Simulation"
             font.pixelSize: 32
-            Layout.topMargin: 0
-            Layout.bottomMargin: 0
-            Layout.minimumHeight: 0
-            Layout.alignment: Qt.AlignHCenter
+            horizontalAlignment: Text.AlignHCenter
+            Layout.fillWidth: true
         }
 
-        // Ini adalah area placeholder tempat jendela Pygame akan muncul.
-        // Untuk saat ini, kita hanya beri bingkai.
+        // This is the black Rectangle you mentioned for placing the simulation
         Rectangle {
-            id: pygamePlaceholder
-            width: 800
-            height: 600
-            color: "#000000" // Latar belakang hitam untuk area game
-            border.color: "white"
-            Layout.alignment: Qt.AlignHCenter
+            id: simulationContainer
+            // Assuming dimensions suitable for the intended simulation area
+            Layout.preferredWidth: parent.width * 0.8
+            Layout.preferredHeight: parent.height * 0.6
+            Layout.alignment: Qt.AlignCenter
+            color: "black" // The black background color you mentioned
+            radius: 10 // Rounded corners for aesthetics
 
-            // Integrasikan PygameSimulationView di dalam Rectangle ini
+            // Integrate PygameSimulationView inside this Rectangle
             PygameSimulationView {
-                // Mengisi seluruh area simulationContainer
+                // Fill the entire area of simulationContainer
                 anchors.fill: parent
-                // Sesuaikan width dan height agar sesuai dengan container
+                // Adjust width and height to match the container
                 width: parent.width
                 height: parent.height
             }
         }
 
+        // Back button or other controls
         Button {
-            id: button
-            text: "Mulai Simulasi GLBB"
-            Layout.alignment: Qt.AlignHCenter
-
-            Connections {
-                target: button
-                function onClicked() {
-                    console.log("test")
-                    simulation.simulationBack()
-                }
-            }
-
-            // Saat tombol ini diklik, ia akan memanggil FUNGSI di PYTHON.
-            // 'pygameBridge' adalah objek Python yang akan kita buat nanti.
+            text: "Back to Menu"
+            Layout.alignment: Qt.AlignCenter
+            width: 200
+            height: 50
+            font.pixelSize: 18
         }
     }
 }

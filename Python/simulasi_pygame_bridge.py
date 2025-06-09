@@ -1,113 +1,134 @@
 import sys
 import pygame
-from PySide6.QtCore import QObject, Signal, Slot, Property, QTimer
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtCore import QObject, Signal, Slot, QTimer, QSize
+from PySide6.QtGui import QImage, QPixmap, qRgb
+from PySide6.QtQuick import QQuickImageProvider
 
-# Penting: Karena direktori 'Python' ditambahkan ke sys.path di main.py,
-# kita bisa menggunakan impor absolut untuk modul di dalamnya.
-# Pastikan file ini bernama 'glbb_simulation.py' di folder yang sama.
+# Import the GLBB simulation class
 from glbb_simulation import GLBBSimulation
 
-class PygameQmlBridge(QObject):
+# Class to manage the Pygame simulation and produce QImages
+class PygameSimulationManager(QObject):
     """
-    Kelas ini bertindak sebagai jembatan antara simulasi Pygame dan UI QML.
-    Ini mengelola siklus Pygame, merender frame, dan mengonversinya menjadi QImage
-    yang dapat ditampilkan di QML.
+    Manages the Pygame simulation lifecycle, updates frames, and provides them as a QImage.
+    This is the "backend" that produces the images to be picked up by the ImageProvider.
     """
-    # Signal yang akan dipancarkan setiap kali frame Pygame baru siap
-    pygameImageChanged = Signal()
+    simulationFrameReady = Signal()
 
     def __init__(self, width=800, height=600, parent=None):
-        """
-        Inisialisasi bridge Pygame.
-
-        Args:
-            width (int): Lebar yang diinginkan untuk permukaan Pygame.
-            height (int): Tinggi yang diinginkan untuk permukaan Pygame.
-            parent (QObject, optional): Objek induk untuk QObject ini.
-        """
         super().__init__(parent)
         self._width = width
         self._height = height
-        self._pygame_image = QImage()  # Ini akan menampung frame Pygame yang dikonversi
-
-        # Inisialisasi Pygame dalam mode headless (tanpa membuat jendela display)
+        
         pygame.init()
-        pygame.font.init() # Pastikan modul font diinisialisasi untuk rendering teks
+        pygame.font.init()
 
-        # Buat permukaan Pygame untuk menggambar.
-        # Menggunakan SRCALPHA memungkinkan transparansi.
+        # Important: Ensure the Pygame surface format is compatible with QImage.
+        # ARGB (Alpha, Red, Green, Blue) is a common and suitable format for SRCALPHA.
+        # QImage.Format_ARGB32 is (A,R,G,B) 32-bit.
         self.pygame_surface = pygame.Surface((width, height), pygame.SRCALPHA)
-        # Inisialisasi simulasi GLBB dengan dimensi yang diberikan
         self.simulation = GLBBSimulation(width, height)
 
-        # QTimer untuk memicu pembaruan Pygame dan rendering ke QImage secara berkala
-        self.timer = QTimer(self)
-        self.timer.setInterval(16)  # Sekitar 60 FPS (1000 ms / 60 = 16.67 ms)
-        self.timer.timeout.connect(self._update_pygame_frame)
-        self.timer.start() # Mulai timer secara otomatis saat objek dibuat
+        # Initialize _current_image with an empty QImage. It will be populated in _update_pygame_frame
+        self._current_image = QImage() 
+        print(f"DEBUG Manager: Initialized. Pygame surface size: {self._width}x{self._height}")
 
-    @Property(QImage, notify=pygameImageChanged)
-    def pygameImage(self):
-        """
-        Properti QML yang mengekspos QImage dari frame Pygame.
-        """
-        return self._pygame_image
+        self.timer = QTimer(self)
+        self.timer.setInterval(16)
+        self.timer.timeout.connect(self._update_pygame_frame)
+        self.timer.start()
+
+        # Perform an initial update so the first image is available immediately
+        self._update_pygame_frame()
 
     @Slot()
     def resetSimulation(self):
-        """
-        Slot QML yang dapat dipanggil dari QML untuk mereset simulasi Pygame.
-        """
         self.simulation.reset_simulation()
-        print("Simulasi Pygame direset!")
+        print("DEBUG Manager: Pygame simulation reset!")
 
     @Slot(float, float)
     def handleMouseClick(self, x, y):
-        """
-        Slot QML untuk menangani klik mouse dari QML dan meneruskannya ke simulasi Pygame
-        (jika simulasi Anda memerlukan interaksi mouse).
-        Untuk simulasi GLBB sederhana ini, ini hanyalah contoh.
-        """
-        # Anda dapat mengubah koordinat (x, y) ini menjadi event Pygame jika diperlukan
-        # Misalnya: pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (int(x), int(y))}))
-        print(f"Klik mouse di bridge Pygame: ({x}, {y})")
-        # Di sini Anda bisa menambahkan logika untuk berinteraksi dengan simulasi Pygame
-        # berdasarkan posisi klik.
+        print(f"DEBUG Manager: Mouse click in simulation: ({x}, {y})")
 
     def _update_pygame_frame(self):
-        """
-        Metode internal yang dipanggil oleh QTimer untuk memperbarui simulasi Pygame,
-        merendernya, dan mengonversi permukaan menjadi QImage.
-        """
-        # Perbarui keadaan simulasi
         self.simulation.update_simulation()
-
-        # Render simulasi ke permukaan Pygame
         self.simulation.render(self.pygame_surface)
 
-        # Konversi permukaan Pygame ke QImage
-        # Pygame biasanya menggunakan format BGRA secara internal, jadi kita gunakan ARGB32
-        # get_pitch() memberikan jumlah byte per baris, yang penting untuk konversi yang benar
-        raw_data = self.pygame_surface.get_view('1') # Dapatkan tampilan byte dari permukaan
-        self._pygame_image = QImage(raw_data, self._width, self._height,
-                                    self.pygame_surface.get_pitch(),  # Byte per baris (pitch)
-                                    QImage.Format_ARGB32).copy()  # Pastikan salinan dibuat
+        # DEBUGGING: Check if pygame_surface is valid before conversion
+        if self.pygame_surface.get_size() != (self._width, self._height):
+            print(f"ERROR Manager: Pygame surface size mismatch! Expected ({self._width}, {self._height}), got {self.pygame_surface.get_size()}")
+            return # Do not proceed if surface is invalid
 
-        self.pygameImageChanged.emit() # Pancarkan sinyal untuk memberi tahu QML bahwa gambar telah berubah
+        # --- Critical part: Convert Pygame Surface to QImage ---
+        # Get raw pixel data from the Pygame surface
+        # '1' refers to a memoryview over the buffer
+        byte_data = self.pygame_surface.get_view('1')
+        
+        # Check the pitch (bytes per line) of the Pygame surface
+        pygame_pitch = self.pygame_surface.get_pitch()
+        
+        # Create QImage from pixel data.
+        # Important: Ensure QImage format matches Pygame surface pixel format.
+        # Pygame surface with SRCALPHA usually has an ARGB format.
+        # QImage.Format_ARGB32 is the corresponding format (Byte Order: A,R,G,B).
+        # Calling .copy() is crucial to ensure QImage owns its pixel data,
+        # preventing memory lifecycle issues.
+        try:
+            self._current_image = QImage(byte_data, self._width, self._height,
+                                          pygame_pitch, # Use pitch from Pygame surface
+                                          QImage.Format_ARGB32).copy()
+        except Exception as e:
+            print(f"CRITICAL ERROR Manager: Failed to create QImage from Pygame surface: {e}")
+            self._current_image = QImage() # Set to null image on failure
+            self.simulationFrameReady.emit() # Still emit signal to avoid hang
+            return
+
+
+        if self._current_image.isNull():
+            print("ERROR Manager: _current_image is NULL after Pygame surface conversion! This is critical.")
+        elif self._current_image.width() == 0 or self._current_image.height() == 0:
+            print(f"ERROR Manager: _current_image has zero dimensions after conversion! {self._current_image.width()}x{self._current_image.height()}")
+        # else:
+        #     print(f"DEBUG Manager: _current_image successfully updated. Size: {self._current_image.width()}x{self._current_image.height()}")
+
+        self.simulationFrameReady.emit()
+
+    def get_current_qimage(self):
+        # print(f"DEBUG Manager: get_current_qimage called. QImage is null: {self._current_image.isNull()}")
+        return self._current_image
 
     def __del__(self):
-        """
-        Destruktor untuk membersihkan sumber daya Pygame saat objek bridge dihancurkan.
-        """
-        # Cek jika timer masih merupakan instance QObject dan belum dihancurkan.
-        # Ini untuk menghindari RuntimeError: Internal C++ object already deleted.
-        if self.timer and not self.timer.parent() is None: # Cek keberadaan objek dan parent (indikator objek C++ masih hidup)
+        if hasattr(self, 'timer') and self.timer is not None:
             try:
-                self.timer.stop() # Hentikan timer
+                if self.timer.isActive():
+                    self.timer.stop()
             except RuntimeError as e:
-                # Tangani kasus di mana objek C++ sudah dihapus oleh Qt
-                print(f"Peringatan: Tidak dapat menghentikan QTimer di __del__: {e}")
-        pygame.quit() # Hentikan Pygame
-        print("Pygame Bridge dihancurkan.")
+                print(f"Warning Manager: Could not stop QTimer in __del__: {e}")
+        
+        if pygame.get_init():
+            pygame.quit()
+        print("DEBUG Manager: Pygame Simulation Manager destroyed.")
+
+
+class PygameImageProvider(QQuickImageProvider):
+    """
+    Provides the latest QImage from PygameSimulationManager to the QML Image element.
+    """
+    def __init__(self, manager: PygameSimulationManager):
+        super().__init__(QQuickImageProvider.ImageType.Image)
+        self._manager = manager
+        print("DEBUG Provider: PygameImageProvider initialized.")
+
+    def requestImage(self, id: str, requestedSize: QSize, imageType: int) -> (QImage, QSize):
+        current_image = self._manager.get_current_qimage()
+        if not current_image.isNull() and current_image.width() > 0 and current_image.height() > 0:
+            # print(f"DEBUG Provider: Requested '{id}'. Returning valid QImage. Size: {current_image.size()}")
+            return current_image, current_image.size()
+        else:
+            print("ERROR Provider: QQuickImageProvider requested image, but QImage from manager is empty or invalid. Returning default red image.")
+            # Ensure requestedSize is valid before creating QImage. If not, create a 1x1 QImage.
+            effective_size = requestedSize if requestedSize.isValid() and requestedSize.width() > 0 and requestedSize.height() > 0 else QSize(1,1)
+            empty_image = QImage(effective_size, QImage.Format_ARGB32)
+            empty_image.fill(qRgb(255, 0, 0)) # Red color for error indication
+            return empty_image, effective_size
 
