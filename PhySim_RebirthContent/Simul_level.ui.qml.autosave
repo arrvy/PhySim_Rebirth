@@ -77,7 +77,7 @@
                             //x: (column.width - width)/2
                             width: Level_button.width
                             height: Level_button.height
-                            text: modelData.levels
+                            text: modelData
                             Connections {
                                 // Targetkan ID delegate yang baru dibuat.
                                 target: levelButtonDelegate

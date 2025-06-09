@@ -58,7 +58,8 @@ Button {
 
         opacity: enabled ? 1.0 : 0.3
         color: "#000000"
-        text: delegateButton.namaMateriDelegate
+        text: control.text
+        //text: "haha"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }

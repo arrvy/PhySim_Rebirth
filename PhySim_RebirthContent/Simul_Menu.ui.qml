@@ -16,6 +16,9 @@ Rectangle {
     width: Constants.width
     height: Constants.height
 
+    property var dataUntukLevel: []
+
+
     //width: 1920
     //height: 1080
 
@@ -52,5 +55,6 @@ Rectangle {
         id: simul_level
         x: 480
         y: 0
+        daftarLevel: root.dataUntukLevel
     }
 }

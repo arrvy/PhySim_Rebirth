@@ -41,9 +41,9 @@ Rectangle {
                     appRoot.state = "simul_MenuState";
                     // Logika for-loop Anda sama persis
                     var levels = DB.materi[levelIndex].levels;
-
-                    simul_Menu.simul_level.daftarLevel = levels;
                     console.log(levels)
+                    simul_Menu.dataUntukLevel = levels;
+
 
                     }
                 }
