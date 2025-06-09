@@ -72,12 +72,20 @@
                         model: pane.daftarLevel
 
                         delegate: Level_button {
-                            //id: level_button
-                            x: (column.width - width)/2
+                            id: level_button
+                            Layout.alignment: Qt.AlignHCenter
+                            //x: (column.width - width)/2
                             width: Level_button.width
                             height: Level_button.height
                             text: modelData
-
+                            Connections {
+                                // Targetkan ID delegate yang baru dibuat.
+                                target: levelButtonDelegate
+                                function onClicked() {
+                                console.log("Tombol sub-level diklik: " + text)
+                                                            // Tambahkan logika untuk mulai simulasi di sini
+                                }
+                            }
 
 
                         }
