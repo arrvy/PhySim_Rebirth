@@ -22,6 +22,7 @@ Window {
         anchors.fill : parent
     }
 
+
     /*Rectangle {
         id: appRoot
 

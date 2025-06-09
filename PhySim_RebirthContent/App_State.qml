@@ -37,25 +37,19 @@ Rectangle {
         Connections {
                 target: mainMenuPage
 
-                function onGoToselectSimulation(namaMateri) {
+                function onGoToselectSimulation(levelIndex) {
+                    appRoot.state = "simul_MenuState";
                     // Logika for-loop Anda sama persis
-                    for (var i = 0; i < DB.materi.length; i++) {
-                        if (DB.materi[i].namaMateri === namaMateri) {
-                            var levels = DB.materi[i].levels;
+                    var levels = DB.materi[levelIndex].levels;
 
-                            // ✅ PERBAIKAN SINTAKS: Hapus '.item'. Akses id anak langsung.
-                            // Pastikan di dalam Simul_Menu.ui.qml, ada komponen Simul_level dengan id: simul_level
-                            simul_Menu.simul_level.daftarLevel = levels;
+                    simul_Menu.simul_level.daftarLevel = levels;
 
-                            appRoot.state = "simul_MenuState";
-                            return
-                        }
                     }
                 }
             }
 
 
-    }
+
 
     Simul_Menu {
         id: simul_Menu

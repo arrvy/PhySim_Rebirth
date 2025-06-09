@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import PhySim_Rebirth 1.0
+import "DataLevel.js" as DB
 
 Pane {
     id: pane
@@ -74,7 +75,7 @@ Pane {
                         x: (column.width - width)/2
                         width: Level_button.width
                         height: Level_button.height
-                        text: "My Button"
+                        text: pane.daftarLevel
 
 
                     }

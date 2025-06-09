@@ -9,10 +9,11 @@ import QtQuick
 import QtQuick.Controls
 import PhySim_Rebirth
 import QtQuick.Studio.DesignEffects
+import "DataLevel.js" as DB
 
 Rectangle {
 
-    signal goToselectSimulation (string namaMateri)
+    signal goToselectSimulation (int levelIndex)
 
     id: root
 

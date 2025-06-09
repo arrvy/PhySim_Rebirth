@@ -10,7 +10,7 @@ Pane {
     width: 960
     height: 1080
 
-    signal selectSimulation(string namaMateri)
+    signal selectSimulation(int levelIndex)
 
     ScrollView {
         id: scrollView
@@ -82,8 +82,7 @@ Pane {
                         Connections {
                             target: delegateButton
                             function onClicked() {
-                                pane.selectSimulation(
-                                            delegateButton.namaMateriDelegate)
+                                pane.selectSimulation(index)
                             }
                         }
                     }
