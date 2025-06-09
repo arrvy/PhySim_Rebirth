@@ -74,14 +74,16 @@ Pane {
                         id: delegateButton
                         width: Level_button.width
                         height: Level_button.height
-                        text: modelData[index].namaMateri
+                        text: modelData.namaMateri
+                        Layout.alignment: Qt.AlignHCenter
 
                         property string namaMateriDelegate: modelData.namaMateri
 
                         Connections {
                             target: delegateButton
-                            function onClicked(){
-                                pane.selectSimulation(delegateButton.namaMateriDelegate)
+                            function onClicked() {
+                                pane.selectSimulation(
+                                            delegateButton.namaMateriDelegate)
                             }
                         }
                     }

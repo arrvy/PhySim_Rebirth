@@ -59,7 +59,7 @@ Rectangle {
         //data: [
             Connections {
                 target: menu_level
-                function onSelectSimulation (namaMateri) { goToselectSimulation(namaMateri) }
+                function onSelectSimulation (namaMateri) { root.goToselectSimulation(namaMateri) }
             }
         //]
 
