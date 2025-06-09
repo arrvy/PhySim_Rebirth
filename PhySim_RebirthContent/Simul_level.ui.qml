@@ -10,7 +10,7 @@ Pane {
     height: 1080
 
     property var daftarLevel: []
-    signal levelSelected(int indexLevel)
+    signal levelSelected(string indexLevel)
 
     ScrollView {
         id: scrollView
@@ -85,7 +85,7 @@ Pane {
                             function onClicked() {
                                 console.log("Tombol sub-level diklik: " + text)
                                 // Tambahkan logika untuk mulai simulasi di sini
-                                pane.levelSelected(indexLevel)
+                                pane.levelSelected(modelData.namaLevel)
                             }
                         }
                     }

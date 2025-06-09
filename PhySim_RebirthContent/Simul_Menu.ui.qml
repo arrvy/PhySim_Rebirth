@@ -18,7 +18,7 @@ Rectangle {
     height: Constants.height
 
     property var dataUntukLevel: []
-    signal goTolevelSelected(int indekLevel)
+    signal goTolevelSelected(string indexLevel)
 
     //width: 1920
     //height: 1080

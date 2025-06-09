@@ -61,6 +61,9 @@ Rectangle {
             function onGoTolevelSelected(indexLevel) {
                 console.log("clicked")
                 appRoot.state = "pygame_State"
+                simulasiPygame.namaSimulasi = indexLevel
+
+
 
             }
         }
@@ -71,6 +74,16 @@ Rectangle {
 
     SimulasiPygame {
         id: simulasiPygame
+
+        Connections {
+            target: simulasiPygame
+            function onSimulationBack() {
+                console.log("clicked")
+                appRoot.state = "simul_MenuState"
+
+            }
+        }
+
     }
 
     // Definisi state Anda sudah benar.
